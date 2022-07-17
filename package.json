@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 11",
     "nodemon": "nodemon server.js",
-    "peer": "peerjs --port 3001"
+    "peerjs": "./peerjs/bin/peerjs --port 3001"
   },
   "keywords": [],
   "author": "",

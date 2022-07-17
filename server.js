@@ -12,12 +12,12 @@ app.use(express.static('public'))
 app.get('/', (req, res) => {
     const link = uuidV4()
     links.push(link)
-    res.redirect(`/${link}`)
+    res.json({ link: link })
 })
 
 app.get('/:room', (req, res) => {
-    if (links.includes(req.params.room) || req.params.room == 'favicon.ico') res.render('room', { roomId: req.params.room })
-    else res.redirect('/')
+    if (links.includes(req.params.room) || req.params.room == 'favicon.ico') res.json({ roomId: req.params.room })
+    else res.status(404).json({ roomId: null })
 })
 
 io.on('connection', socket => {
@@ -30,6 +30,6 @@ io.on('connection', socket => {
     })
 })
 
-server.listen(3000, '127.0.0.1', () => {
-    console.log('Server started at: http://127.0.0.1:3000')
+server.listen(5000, '127.0.0.1', () => {
+    console.log('Server started at: http://127.0.0.1:5000')
 })

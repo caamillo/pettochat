@@ -3,7 +3,7 @@ const videoGrid = document.getElementById('video-grid')
 
 const myPeer = new Peer(undefined, {
     host: '/',
-    port: '3001'
+    port: '5001'
 })
 
 const myVideo = document.createElement('video')
@@ -61,4 +61,5 @@ const addVideoStream = (video, stream) => {
         video.play()
     })
     videoGrid.append(video)
+    console.log(video, videoGrid, stream)
 }

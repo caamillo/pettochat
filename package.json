@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 11",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "nodemon": "nodemon server.js",
     "peerjs": "./peerjs/bin/peerjs --port 3001"
   },

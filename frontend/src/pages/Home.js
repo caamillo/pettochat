@@ -1,5 +1,6 @@
 // React
 import { useState, useEffect, useRef } from 'react'
+import { useParams } from 'react-router-dom'
 
 // Tailwind
 import '../tailwind/tailwind.css'
@@ -14,7 +15,7 @@ import { Peer } from "peerjs";
 const socket = io.connect('http://localhost:5000')
 console.log(socket)
 
-function App() {
+function Home() {
 
     const [uid, setUid] = useState()
     const [roomId, setRoomId] = useState()
@@ -32,6 +33,8 @@ function App() {
     const peers = {}
     const [videos, setVideos] = useState([])
 
+    const { proom } = useParams()
+
     const addVideoStream = (video, stream) => {
         video.srcObject = stream
         video.addEventListener('loadedmetadata', () => {
@@ -44,6 +47,7 @@ function App() {
         const call = myPeer.call(userId, stream)
         const video = document.createElement('video')
         call.on('stream', userVideoStream => {
+            console.log('streaming')
             addVideoStream(video, userVideoStream)
         })
         call.on('close', () =>  {
@@ -83,14 +87,16 @@ function App() {
         if (localStorage.getItem('roomId') != null && localStorage.getItem('uid') != null) {
             setUid(localStorage.getItem('uid'));
             setRoomId(localStorage.getItem('roomId'))
-        } else {
-            socket.on('get-room', roomId => {
-                setRoomId(roomId)
-            })
-            myPeer.on('open', (id) => {
-                setUid(id)
-            })
+            return
         }
+        if (proom) { socket.emit('isvalid', proom); socket.on('isvalid', (res) => {
+            console.log('proom valid:', res)
+            if (res) setRoomId(proom)
+            else window.location.href = '/'
+        }) }
+        else
+            if (roomId == null) socket.on('get-room', roomId => setRoomId(roomId))
+            if (uid == null) myPeer.on('open', uid => setUid(uid))
     }, [])
 
     useEffect(() => {
@@ -113,13 +119,13 @@ function App() {
         <>
         <p>Room ID: { roomId }</p>
         <p>UID: { uid }</p>
-            <div className='h-full flex items-center justify-center'>
-                <div id="video-grid" className='grid grid-cols-2 gap-4'>
-                    { videos.map(v => <video key={ v.srcObject.id }></video>) }
-                </div>
+        <div className='h-full flex items-center justify-center'>
+            <div id="video-grid" className='grid grid-cols-2 gap-4'>
+                { videos.map(v => <video className='bg-[#000]' key={ v.srcObject.id }></video>) }
             </div>
+        </div>
         </>
     );
 }
 
-export default App;
+export default Home;

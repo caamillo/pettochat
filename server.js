@@ -28,6 +28,10 @@ io.on('connection', socket => {
     links.push(link)
     console.log('connection', link)
     socket.emit('get-room', link)
+    socket.on('isvalid', link => {
+        if (links.includes(link) || link == 'favicon.ico') socket.emit('isvalid', true)
+        else socket.emit('isvalid', false)
+    })
     socket.on('join-room', (roomId, userId) => {
         socket.join(roomId)
         socket.to(roomId).emit('user-connected', userId)

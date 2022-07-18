@@ -25,7 +25,7 @@ app.use(cors())
 // Socket Connetion
 io.on('connection', async (socket) => {
 
-    socket.emit('get-room', [(await db.getTestRoom())._id.toString(), socket.id]) // Connect To Test-Room
+    socket.emit('get-room', [await db.getTestRoom(), socket.id]) // Connect To Test-Room
 
     socket.on('isvalid', async (id) => {
         if (await db.RoomsModel.findOne({ _id: mongoose.Types.ObjectId(id) }) != null) return socket.emit('isvalid', true)

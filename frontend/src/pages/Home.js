@@ -14,8 +14,8 @@ console.log(socket)
 
 function Home() {
 
-    const [uid, setUid] = useState()
-    const [roomId, setRoomId] = useState()
+    const [user, setUser] = useState()
+    const [room, setRoom] = useState()
 
     const myVid = useRef()
     const [myStream, setMyStream] = useState()
@@ -28,6 +28,8 @@ function Home() {
     const [isConnected, setIsConnected] = useState(false)
 
     const { proom } = useParams()
+
+    const getRoomId = () => room._id.toString()
 
     const addVideoStream = (video, stream) => {
         video.srcObject = stream
@@ -55,29 +57,29 @@ function Home() {
     }, [])
 
     useEffect(() => {
-        // get UID and ROOMID
-        if (localStorage.getItem('roomId') != null && localStorage.getItem('uid') != null) {
-            setUid(localStorage.getItem('uid'));
-            setRoomId(localStorage.getItem('roomId'))
+        // get user and room
+        if (localStorage.getItem('room') != null && localStorage.getItem('user') != null) {
+            setUser(localStorage.getItem('user'));
+            setRoom(localStorage.getItem('room'))
             return
         }
         if (proom) {
             socket.emit('isvalid', proom);
             socket.on('isvalid', (res) => {
                 console.log('proom valid:', res)
-                if (res) setRoomId(proom)
+                if (res) setRoom(proom)
                 else window.location.href = '/'
             })
-        } else if (roomId == null || uid == null) socket.on('get-room', ([roomId, uid]) => {setRoomId(roomId); setUid(uid)})
+        } else if (room == null || user == null) socket.on('get-room', ([room, user]) => {setRoom(room); setUser(user)})
     }, [])
 
     useEffect(() => {
-        console.log(uid, roomId)
-        if (uid == null || roomId == null) return console.log('Error Room / UID')
-        socket.emit('join-room', roomId, uid)
+        console.log(user, room)
+        if (user == null || room == null) return console.log('Error Room / User')
+        socket.emit('join-room', getRoomId(), user)
         console.log('connected')
         setIsConnected(true)
-    }, [uid, roomId])
+    }, [user, room])
 
     useEffect(() => {
         const videosDisplayed = document.getElementsByTagName('video')
@@ -90,8 +92,9 @@ function Home() {
 
     return (
         <div className='m-4'>
-        <p>Room ID: { roomId }</p>
-        <p>UID: { uid }</p>
+        <p>room_name: { room && room.name }</p>
+        <p>room_id: { room && getRoomId() }</p>
+        <p>uid: { user }</p>
         <p>State: { isConnected ? 'Connected' : 'Not Connected' }</p>
         <div className='h-full flex items-center justify-center m-5'>
             <div id="video-grid" className='grid grid-cols-2 gap-4'>

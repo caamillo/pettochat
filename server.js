@@ -28,18 +28,17 @@ io.on('connection', async (socket) => {
     socket.emit('get-room', [await db.getTestRoom(), socket.id]) // Connect To Test-Room
 
     socket.on('isvalid', async (id) => {
-        if (await db.RoomsModel.findOne({ _id: mongoose.Types.ObjectId(id) }) != null) return socket.emit('isvalid', true)
-        socket.emit('isvalid', false)
+        const res = await db.RoomsModel.findOne({ _id: mongoose.Types.ObjectId(id) })
+        if (res != null) return socket.emit('isvalid', [res, socket.id])
+        socket.emit('isvalid', res)
     })
 
-    socket.on('join-room', (roomId, userId) => {
+    socket.on('join-room', (roomId, userId, stream) => {
         console.log(`user ${userId.substring(0,3)} joined ${roomId.substring(0,3)}`);
 
         socket.join(roomId)
-        socket.on('ready',()=>{
-            console.log('readyyy')
-            socket.broadcast.to(roomId).emit('user-connected', userId);
-        })
+        console.log(stream)
+        socket.broadcast.to(roomId).emit('user-connected', userId, stream);
 
         socket.on('disconnect', () => {
             socket.to(roomId).emit('user-disconnected', userId)

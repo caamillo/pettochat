@@ -11,7 +11,8 @@ import io from 'socket.io-client'
 // Peerjs
 import { Peer } from "peerjs";
 
-const socket = io.connect('http://localhost:5000', {transports: ['websocket', 'polling', 'flashsocket']})
+const socket = io.connect('http://localhost:5000')
+console.log(socket)
 
 function App() {
 
@@ -38,7 +39,6 @@ function App() {
             video.play()
         })
         setVideos([...videos, video])
-        console.log(videos)
     }
 
     // Init vids
@@ -68,27 +68,26 @@ function App() {
             setUid(localStorage.getItem('uid'));
             setRoomId(localStorage.getItem('roomId'))
         } else {
-            console.log(socket)
             socket.on('get-room', roomId => {
                 setRoomId(roomId)
             })
-            myPeer.on('open', id => {
+            myPeer.on('open', (id) => {
                 setUid(id)
                 socket.emit('join-room', roomId, id)
             })
         }
-
-        if (uid == null || roomId == null) return console.log('Error Room / UID', uid, roomId)
-        console.log(uid, roomId)
-
     }, [])
+
+    useEffect(() => {
+        console.log(uid, roomId)
+        if (uid == null || roomId == null) return console.log('Error Room / UID')
+        console.log('yess')
+    }, [uid, roomId])
 
     useEffect(() => {
         const videosDisplayed = document.getElementsByTagName('video')
         let c = 0
         for (const vid of videosDisplayed) {
-            console.log('update videos')
-            console.log(videos[c].srcObject)
             vid.srcObject = videos[c].srcObject
             c += 1
         }

@@ -1,10 +1,13 @@
 const express = require('express')
 const app = express()
-const server = require('http').Server(app)
-const io = require('socket.io')(server, {
+const { Server } = require('socket.io')
+const server = require('http').createServer(app)
+const cors = require('cors')
+
+const io = new Server(server, {
     cors: {
         origin: 'http://localhost:3000',
-        methods: [ 'GET', 'POST' ]
+        methods: ['GET', 'POST']
     }
 })
 const { v4: uuidV4 } = require('uuid')
@@ -13,6 +16,7 @@ const links = []
 
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
+app.use(cors())
 
 app.get('/:room', (req, res) => {
     if (links.includes(req.params.room) || req.params.room == 'favicon.ico') res.json({ roomId: req.params.room })
@@ -22,6 +26,7 @@ app.get('/:room', (req, res) => {
 io.on('connection', socket => {
     const link = uuidV4()
     links.push(link)
+    console.log('connection', link)
     socket.emit('get-room', link)
     socket.on('join-room', (roomId, userId) => {
         socket.join(roomId)

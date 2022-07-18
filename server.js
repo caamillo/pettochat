@@ -2,7 +2,9 @@ const express = require('express')
 const app = express()
 const { Server } = require('socket.io')
 const server = require('http').createServer(app)
+const { v4: uuidV4 } = require('uuid')
 const cors = require('cors')
+
 
 const io = new Server(server, {
     cors: {
@@ -10,8 +12,6 @@ const io = new Server(server, {
         methods: ['GET', 'POST']
     }
 })
-const { v4: uuidV4 } = require('uuid')
-
 const links = []
 
 app.set('view engine', 'ejs')

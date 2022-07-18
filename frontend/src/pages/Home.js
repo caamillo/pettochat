@@ -25,6 +25,8 @@ function Home() {
     const peers = {}
     const [videos, setVideos] = useState([])
 
+    const [isConnected, setIsConnected] = useState(false)
+
     const { proom } = useParams()
 
     const addVideoStream = (video, stream) => {
@@ -33,19 +35,6 @@ function Home() {
             video.play()
         })
         setVideos([...videos, video])
-    }
-
-    const connectToNewUser = (userId, stream) => {
-        const call = myPeer.call(userId, stream)
-        const video = document.createElement('video')
-        call.on('stream', userVideoStream => {
-            console.log('streaming')
-            addVideoStream(video, userVideoStream)
-        })
-        call.on('close', () =>  {
-            video.remove()
-        })
-        peers[userId] = call
     }
 
     // Init vids
@@ -59,19 +48,8 @@ function Home() {
             setMyStream(stream)
             addVideoStream(myVideoSource, stream)
 
-            myPeer.on('call', call => {
-                console.log('calling')
-                call.answer(stream)
-                const video = document.createElement('video')
-                call.on('stream', userVideoStream => {
-                    addVideoStream(video, userVideoStream)
-                })
-                socket.emit("ready")
-            })
-
             socket.on('user-connected', userId => {
-                console.log('test')
-                connectToNewUser(userId, stream)
+                console.log('user connected', userId.substring(0,3))
             })
         })
     }, [])
@@ -86,14 +64,11 @@ function Home() {
         if (proom) {
             socket.emit('isvalid', proom);
             socket.on('isvalid', (res) => {
-            console.log('proom valid:', res)
-            if (res) setRoomId(proom)
-            else window.location.href = '/'
-        })
-        }
-        else
-            if (roomId == null) socket.on('get-room', roomId => setRoomId(roomId))
-            if (uid == null) myPeer.on('open', uid => setUid(uid))
+                console.log('proom valid:', res)
+                if (res) setRoomId(proom)
+                else window.location.href = '/'
+            })
+        } else if (roomId == null || uid == null) socket.on('get-room', ([roomId, uid]) => {setRoomId(roomId); setUid(uid)})
     }, [])
 
     useEffect(() => {
@@ -101,6 +76,7 @@ function Home() {
         if (uid == null || roomId == null) return console.log('Error Room / UID')
         socket.emit('join-room', roomId, uid)
         console.log('connected')
+        setIsConnected(true)
     }, [uid, roomId])
 
     useEffect(() => {
@@ -113,15 +89,16 @@ function Home() {
     }, [videos])
 
     return (
-        <>
+        <div className='m-4'>
         <p>Room ID: { roomId }</p>
         <p>UID: { uid }</p>
-        <div className='h-full flex items-center justify-center'>
+        <p>State: { isConnected ? 'Connected' : 'Not Connected' }</p>
+        <div className='h-full flex items-center justify-center m-5'>
             <div id="video-grid" className='grid grid-cols-2 gap-4'>
                 { videos.map(v => <video className='bg-[#000]' key={ v.srcObject.id }></video>) }
             </div>
         </div>
-        </>
+        </div>
     );
 }
 

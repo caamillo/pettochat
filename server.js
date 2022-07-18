@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const express = require('express')
 const app = express()
 const { Server } = require('socket.io')
@@ -24,16 +25,15 @@ app.use(cors())
 // Socket Connetion
 io.on('connection', async (socket) => {
 
-    socket.emit('get-room', (await db.getTestRoom())._id.toString()) // Connect To Test-Room
+    socket.emit('get-room', [(await db.getTestRoom())._id.toString(), socket.id]) // Connect To Test-Room
 
-    // Subject to change
-    socket.on('isvalid', link => {
-        if (links.includes(link) || link == 'favicon.ico') socket.emit('isvalid', true)
-        else socket.emit('isvalid', false)
+    socket.on('isvalid', async (id) => {
+        if (await db.RoomsModel.findOne({ _id: mongoose.Types.ObjectId(id) }) != null) return socket.emit('isvalid', true)
+        socket.emit('isvalid', false)
     })
 
     socket.on('join-room', (roomId, userId) => {
-        console.log(`user ${userId} joined ${roomId}`);
+        console.log(`user ${userId.substring(0,3)} joined ${roomId.substring(0,3)}`);
 
         socket.join(roomId)
         socket.on('ready',()=>{

@@ -33,8 +33,12 @@ io.on('connection', socket => {
         else socket.emit('isvalid', false)
     })
     socket.on('join-room', (roomId, userId) => {
+        console.log(`user ${userId} joined ${roomId}`);
         socket.join(roomId)
-        socket.to(roomId).emit('user-connected', userId)
+        socket.on('ready',()=>{
+            console.log('readyyy')
+            socket.broadcast.to(roomId).emit('user-connected', userId);
+        })
         socket.on('disconnect', () => {
             socket.to(roomId).emit('user-disconnected', userId)
         })

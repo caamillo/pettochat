@@ -68,11 +68,13 @@ function Home() {
             addVideoStream(myVideoSource, stream)
 
             myPeer.on('call', call => {
+                console.log('calling')
                 call.answer(stream)
                 const video = document.createElement('video')
                 call.on('stream', userVideoStream => {
                     addVideoStream(video, userVideoStream)
                 })
+                socket.emit("ready")
             })
 
             socket.on('user-connected', userId => {
@@ -89,11 +91,14 @@ function Home() {
             setRoomId(localStorage.getItem('roomId'))
             return
         }
-        if (proom) { socket.emit('isvalid', proom); socket.on('isvalid', (res) => {
+        if (proom) {
+            socket.emit('isvalid', proom);
+            socket.on('isvalid', (res) => {
             console.log('proom valid:', res)
             if (res) setRoomId(proom)
             else window.location.href = '/'
-        }) }
+        })
+        }
         else
             if (roomId == null) socket.on('get-room', roomId => setRoomId(roomId))
             if (uid == null) myPeer.on('open', uid => setUid(uid))

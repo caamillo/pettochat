@@ -11,7 +11,15 @@ const Connect = async () => {
 
 const RoomsModel = mongoose.model('rooms', mongoose.Schema({}, { strict: false }))
 
+// Helpful functions
+const getRoomById = async (id) => await RoomsModel.findOne({ _id: mongoose.Types.ObjectId(id) })
+
+// Test Function
+const getTestRoom = async () => (await RoomsModel.find({ _id: mongoose.Types.ObjectId('62d5a47ed8635df5104e07b9') })).at(0)
+
 module.exports = {
     Connect,
-    RoomsModel
+    RoomsModel,
+    getRoomById,
+    getTestRoom
 }

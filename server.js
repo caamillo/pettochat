@@ -2,9 +2,10 @@ const express = require('express')
 const app = express()
 const { Server } = require('socket.io')
 const server = require('http').createServer(app)
-const { v4: uuidV4 } = require('uuid')
 const cors = require('cors')
+const db = require('./db')
 
+// Socket Init
 const io = new Server(server, {
     cors: {
         origin: 'http://localhost:3000',
@@ -12,13 +13,18 @@ const io = new Server(server, {
     }
 })
 
-app.set('view engine', 'ejs')
-app.use(express.static('public'))
+// Use Cors
 app.use(cors())
 
-io.on('connection', socket => {
+// DB Connection
+;(async () => {
+    await db.Connect()
+})()
 
-    socket.emit('get-room', link)
+// Socket Connetion
+io.on('connection', async (socket) => {
+
+    socket.emit('get-room', (await db.getTestRoom())._id.toString()) // Connect To Test-Room
 
     // Subject to change
     socket.on('isvalid', link => {

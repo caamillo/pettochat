@@ -9,9 +9,6 @@ import '../tailwind/output.css'
 // Socket
 import io from 'socket.io-client'
 
-// Peerjs
-import { Peer } from "peerjs";
-
 const socket = io.connect('http://localhost:5000')
 console.log(socket)
 
@@ -24,11 +21,6 @@ function Home() {
     const [myStream, setMyStream] = useState()
 
     const usrsVid = []
-
-    const myPeer = new Peer(undefined, {
-        host: '/',
-        port: '5001'
-    })
 
     const peers = {}
     const [videos, setVideos] = useState([])
